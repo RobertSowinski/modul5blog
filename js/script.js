@@ -1,19 +1,27 @@
 'use strict';
 
 function titleClickHandler(event){
-  console.log('Link was clicked!');
-  console.log(event);
-  /* remove class 'active' from all article links  */
+    console.log('Link was clicked!');
+    console.log(event);
+    /* remove class 'active' from all article links  */
+    const activeLinks = document.querySelectorAll('.titles a.active');
 
-  /* add class 'active' to the clicked link */
+    for(let activeLink of activeLinks){
+    activeLink.classList.remove('active');
+    }
+    /* add class 'active' to the clicked link */
+    const activeArticles = document.querySelectorAll('.posts article.active');
 
-  /* remove class 'active' from all articles */
+    for(let activeArticle of activeArticles){
+    activeArticle.classList.remove('active');
+    }
+    /* remove class 'active' from all articles */
 
-  /* get 'href' attribute from the clicked link */
+    /* get 'href' attribute from the clicked link */
 
-  /* find the correct article using the selector (value of 'href' attribute) */
+    /* find the correct article using the selector (value of 'href' attribute) */
 
-  /* add class 'active' to the correct article */
+    /* add class 'active' to the correct article */
 }
 
 const links = document.querySelectorAll('.titles a');
