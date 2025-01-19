@@ -1,4 +1,12 @@
 'use strict';
+const templates = {
+  articleLink: Handlebars.compile(document.querySelector('#template-article-link').innerHTML),
+  tagLinkInArticle: Handlebars.compile(document.querySelector('#template-tag-link-in-article').innerHTML),
+  authorLinkInArticle: Handlebars.compile(document.querySelector('#template-author-link-in-article').innerHTML),
+  tagCloudLink: Handlebars.compile(document.querySelector('#template-tag-cloud-link').innerHTML), 
+  authorListLink: Handlebars.compile(document.querySelector('#template-author-list-link').innerHTML) 
+};
+
 
 function titleClickHandler(event) {
     event.preventDefault();
@@ -64,8 +72,8 @@ function generateTitleLinks(customSelector = '') {
         const articleTitle = articleTitleElement.innerHTML;
 
         /* create HTML of the link */
-        const linkHTML = '<li><a href="#' + articleId + '"><span>' + articleTitle + '</span></a></li>';
-
+        const linkHTMLData = {id: articleId, title: articleTitle};
+        const linkHTML = templates.articleLink(linkHTMLData);
         /* insert link into titleList */
         titleList.insertAdjacentHTML('beforeend', linkHTML);
     }
@@ -140,10 +148,12 @@ function generateTags(){
     /* START LOOP: for each tag */
     for (let tag of articleTagsArray) {
       /* Generate HTML of the link */
-      const linkHTML = `<li><a href="#tag-${tag}">${tag}</a></li>`;
+
+      const tagLinkData = { tag: tag };
+      const tagLinkHTML = templates.tagLinkInArticle(tagLinkData);
 
       /* Add generated code to html variable */
-      html += linkHTML;
+      html += tagLinkHTML;
 
       /* [NEW] check if this tag is NOT already in allTags */
       //[tag] to to samo co .hasOwnProperty
@@ -169,7 +179,7 @@ function generateTags(){
   /* [NEW] create a variable to hold the HTML of all tags */
   const tagsParams = calculateTagsParams(allTags);
   console.log('tagsParams: ', tagsParams);
-  let allTagsHTML = '';
+  const allTagsData = { tags: [] };
   
   //dodane sortowanie od największej liczby wystąpień tagu do najmniejszej
 
@@ -179,13 +189,17 @@ function generateTags(){
 
   /* [NEW] for each tag in sortedTags array, generate the HTML and add it to allTagsHTML */
   for (let [tag, count] of sortedTags) {
-    const tagLinkHTML = `<li><a href="#tag-${tag}" class="${optCloudClassPrefix}${calculateTagClass(count, tagsParams)}">${tag}</a></li>`;
-    console.log('tagLinkHTML: ', tagLinkHTML);
-    allTagsHTML += tagLinkHTML;
+    const tagClass = `${optCloudClassPrefix}${calculateTagClass(count, tagsParams)}`;
+        allTagsData.tags.push({ // Dodawanie obiektu do tablicy
+            tag: tag,
+            count: count,
+            className: tagClass
+        });
   }
 
   /* [NEW] add html from allTags to tagList */
-  tagList.innerHTML = allTagsHTML;
+  tagList.innerHTML = templates.tagCloudLink(allTagsData); 
+  console.log("allTagsData: ", allTagsData);
 }
 
 generateTags();
@@ -245,12 +259,11 @@ function generateAuthors() {
   const articles = document.querySelectorAll(optArticleSelector);
 
   for (const article of articles) {
-      const authorName = article.getAttribute('data-author');
-      const authorWrapper = article.querySelector('.post-author');
-      authorWrapper.innerHTML = '';
-
-      const authorHTML = `<a href="#author-${authorName}">${authorName}</a>`;
-      authorWrapper.insertAdjacentHTML('beforeend', authorHTML);
+    const authorName = article.getAttribute('data-author');
+    const authorWrapper = article.querySelector('.post-author');
+    const authorLinkData = { author: authorName };
+    const authorLinkHTML = templates.authorLinkInArticle(authorLinkData);
+    authorWrapper.innerHTML = authorLinkHTML;
 
       if (!allAuthors[authorName]) {
           allAuthors[authorName] = 1;
@@ -265,18 +278,21 @@ function generateAuthors() {
   const authorsParams = calculateTagsParams(allAuthors);
   console.log('authorsParams: ', authorsParams);
 
-  let allAuthorsHTML = '';
+  const allAuthorsData = { authors: [] };
 
   const sortedAuthors = Object.entries(allAuthors).sort((a, b) => b[1] - a[1]);
 
   for (let [author, count] of sortedAuthors) {
-      const authorClass = `${optAuthorClassPrefix}${calculateTagClass(count, authorsParams)}`;
-      const authorHTML = `<li><a href="#author-${author}" class="${authorClass}">${author}</a></li>`;
-      console.log('authorHTML: ', authorHTML);
-      allAuthorsHTML += authorHTML;
+    const authorClass = `${optAuthorClassPrefix}${calculateTagClass(count, authorsParams)}`;
+    allAuthorsData.authors.push({ // Dodawanie obiektu do tablicy
+        author: author,
+        count: count,
+        className: authorClass
+    });
   }
 
-  authorsList.innerHTML = allAuthorsHTML;
+  authorsList.innerHTML = templates.authorListLink(allAuthorsData);
+  console.log("allAuthorsData", allAuthorsData);
 }
 
 function filterArticlesByAuthor(author) {
