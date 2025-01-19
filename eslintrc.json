@@ -29,6 +29,8 @@
         ],
         "no-prototype-builtins": ["off"]
     },
+    "no-unused-vars": "error"
+    ,
     "globals": {
     "Handlebars": false
     }
